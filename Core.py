@@ -1,3 +1,5 @@
+import sys
+import sqlite3
 from PyQt5.QtWidgets import (
     QApplication,
     QLabel,
@@ -7,6 +9,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QStackedWidget,
     QHBoxLayout,
+    QTextEdit,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPalette, QColor
@@ -92,19 +95,57 @@ class MainWindow(QWidget):
         search_layout.addWidget(self.search_bar)  # Add search bar to the right
         search_layout.addStretch()  # Add stretch to push them to the top
 
-        # Create a back button to return to the main menu
-        back_button = QPushButton("Back to Main Menu")
-        back_button.clicked.connect(self.show_main_menu)  # Connect button click to return function
+        # Create a button for searching Pokémon
+        search_button = QPushButton("Search")
+        search_button.clicked.connect(self.search_pokemon)  # Connect the search button to the search function
 
         # Add the horizontal layout and back button to the main layout
         layout.addLayout(search_layout)  # Add the horizontal layout to the main vertical layout
-        layout.addStretch()  # Add stretch to push the back button to the bottom
+        layout.addWidget(search_button)  # Add the search button to the layout
+
+        # Create a QTextEdit widget to display search results
+        self.results_display = QTextEdit()
+        self.results_display.setReadOnly(True)  # Make it read-only
+        layout.addWidget(self.results_display)  # Add the results display to the layout
+
+        # Add a stretchable space to push the back button to the bottom without stretching everything else
+        layout.addStretch()  # This will push the back button down
+
+        # Create a back button to return to the main menu
+        back_button = QPushButton("Back to Main Menu")
+        back_button.clicked.connect(self.show_main_menu)  # Connect button click to return function
         layout.addWidget(back_button)  # Add the back button to the layout
 
         search_widget.setLayout(layout)  # Set the layout for the search widget
         self.stacked_widget.addWidget(search_widget)  # Add the new search widget to the stacked widget
         self.stacked_widget.setCurrentWidget(search_widget)  # Switch to the search screen
+
+    def search_pokemon(self):
+        # Get the input from the search bar
+        search_query = self.search_bar.text().strip()
+
+        # Connect to the database and search for Pokémon
+        conn = sqlite3.connect('Pokemon.db')  # Replace with your .db file path
+        cursor = conn.cursor()
+
+        # Execute a query to find Pokémon by ID or Name
+        query = "SELECT * FROM Pokemon WHERE ID = ? OR Name = ?"
+        cursor.execute(query, (search_query, search_query))
         
+        # Fetch the results
+        results = cursor.fetchall()
+        conn.close()
+
+        # Display results in the results_display QTextEdit
+        if results:
+            display_text = ""
+            for row in results:
+                display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
+            self.results_display.setPlainText(display_text)  # Display the formatted results
+        else:
+            self.results_display.setPlainText("No Pokémon found.")  # Display a message if no results
+
+
     def show_search_screen(self):
         self.setup_search_screen()  # Creates and set up a new search screen instance
 

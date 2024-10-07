@@ -125,7 +125,7 @@ class MainWindow(QWidget):
         search_query = self.search_bar.text().strip()
 
         # Connect to the database and search for Pokémon
-        conn = sqlite3.connect('Pokemon.db')  # Replace with your .db file path
+        conn = sqlite3.connect('Data.db')  # Replace with your .db file path
         cursor = conn.cursor()
 
         # Execute a query to find Pokémon by ID or Name

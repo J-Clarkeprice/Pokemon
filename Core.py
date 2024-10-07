@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
     QWidget,
     QLineEdit,
     QStackedWidget,
+    QHBoxLayout,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPalette, QColor
@@ -48,7 +49,8 @@ class MainWindow(QWidget):
         label.setFont(QFont('Arial', 24))  # Set font style and size
         label.setStyleSheet("color: white; margin: 20px;")  # Set text color and margin
         layout.addWidget(label)  # Add the label to the layout
-
+        layout.addStretch()  # Add stretch to push the buttons downward
+        
         # Creates a button for searching Pokémon
         search_button = QPushButton("Search Pokémon")
         search_button.clicked.connect(self.show_search_screen)  # Connect button click to the search function
@@ -70,29 +72,39 @@ class MainWindow(QWidget):
         self.main_menu_widget.setLayout(layout)  # Sets the layout for the main menu widget
 
     def setup_search_screen(self):
-        search_widget = QWidget()  # Creates a new widget for the search screen
-        layout = QVBoxLayout()  # Creates a vertical layout for the search screen
+        search_widget = QWidget()  # Create a new widget for the search screen
+        layout = QVBoxLayout()  # Create a vertical layout for the search screen
 
-        # Creates and style the search label
+        # Create a horizontal layout for the label and search bar
+        search_layout = QHBoxLayout()  # Horizontal layout to place label and input side by side
+
+        # Create and style the search label
         search_label = QLabel("Search for Pokémon by ID or Name:")
         search_label.setFont(QFont('Arial', 18))  # Set font style and size
         search_label.setStyleSheet("color: white; margin: 20px;")  # Set text color and margin
-        layout.addWidget(search_label)  # Add the label to the layout
-
-        # Creates a search bar for user input
-        self.search_bar = QLineEdit()  # Creates a line edit for search input
+    
+        # Create a search bar for user input
+        self.search_bar = QLineEdit()  # Create a line edit for search input
         self.search_bar.setPlaceholderText("Enter Pokémon ID or Name")  # Set placeholder text
-        layout.addWidget(self.search_bar)  # Adds the search bar to the layout
 
-        # Creates a back button to return to the main menu
+        # Add the label and search bar to the horizontal layout
+        search_layout.addWidget(search_label)  # Add label to the left
+        search_layout.addWidget(self.search_bar)  # Add search bar to the right
+        search_layout.addStretch()  # Add stretch to push them to the top
+
+        # Create a back button to return to the main menu
         back_button = QPushButton("Back to Main Menu")
-        back_button.clicked.connect(self.show_main_menu)  # Connecst button click to return function
-        layout.addWidget(back_button)  # Adds the back button to the layout
+        back_button.clicked.connect(self.show_main_menu)  # Connect button click to return function
 
-        search_widget.setLayout(layout)  # Sets the layout for the search widget
-        self.stacked_widget.addWidget(search_widget)  # Adds the new search widget to the stacked widget
-        self.stacked_widget.setCurrentWidget(search_widget)  # Switchs to the search screen
+        # Add the horizontal layout and back button to the main layout
+        layout.addLayout(search_layout)  # Add the horizontal layout to the main vertical layout
+        layout.addStretch()  # Add stretch to push the back button to the bottom
+        layout.addWidget(back_button)  # Add the back button to the layout
 
+        search_widget.setLayout(layout)  # Set the layout for the search widget
+        self.stacked_widget.addWidget(search_widget)  # Add the new search widget to the stacked widget
+        self.stacked_widget.setCurrentWidget(search_widget)  # Switch to the search screen
+        
     def show_search_screen(self):
         self.setup_search_screen()  # Creates and set up a new search screen instance
 
@@ -109,11 +121,13 @@ class MainWindow(QWidget):
         label.setStyleSheet("color: white; margin: 20px;")  # Sets text color and margin
         
         layout.addWidget(label)  # Adds the label to the layout
+        layout.addStretch()  # Add stretch to push the label to the top
         
         # Creates a back button for returning to the main menu
         back_button = QPushButton("Back to Main Menu")
         back_button.clicked.connect(self.show_main_menu)  # Connect button click to return function
         layout.addWidget(back_button)  # Adds the back button to the layout
+        layout.addStretch()  # Add stretch to push the button to the bottom
         
         # Creates a button to go to the screens that are under constrution
         feature_widget.setLayout(layout)  # Sets the layout for the feature widget

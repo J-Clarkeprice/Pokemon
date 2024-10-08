@@ -122,14 +122,14 @@ class MainWindow(QWidget):
 
     def search_pokemon(self):
         # Get the input from the search bar
-        search_query = self.search_bar.text().strip()
+        search_query = self.search_bar.text().strip().lower()
 
         # Connect to the database and search for Pokémon
         conn = sqlite3.connect('Data.db')  # Replace with your .db file path
         cursor = conn.cursor()
 
         # Execute a query to find Pokémon by ID or Name
-        query = "SELECT * FROM Pokemon WHERE ID = ? OR Name = ?"
+        query = "SELECT * FROM Pokemon WHERE ID = ? OR LOWER(NAME) = ?"
         cursor.execute(query, (search_query, search_query))
         
         # Fetch the results

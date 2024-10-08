@@ -10,31 +10,31 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QHBoxLayout,
     QTextEdit,
+    QComboBox,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPalette, QColor
-
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
         # Sets up the main window properties
-        self.setWindowTitle("Cool Pokemon App")  # Title of the application window
-        self.setGeometry(100, 100, 600, 400)  # Position and size of the window
+        self.setWindowTitle("Cool Pokemon App")
+        self.setGeometry(100, 100, 600, 400)
 
         # Sets a custom color palette for the application
         palette = QPalette()
-        palette.setColor(QPalette.Window, QColor("#2c3e50"))  # Dark blue-gray background color
-        palette.setColor(QPalette.WindowText, Qt.white)  # White text color
-        self.setPalette(palette)  # Apply the color palette to the window
+        palette.setColor(QPalette.Window, QColor("#2c3e50"))
+        palette.setColor(QPalette.WindowText, Qt.white)
+        self.setPalette(palette)
 
         # Creates a QStackedWidget to manage different screens in the application
         self.stacked_widget = QStackedWidget(self)
 
         # Creates the main menu screen
         self.main_menu_widget = QWidget()
-        self.setup_main_menu()  # Set up the main menu layout
+        self.setup_main_menu()
 
         # Adds the main menu screen to the stacked widget
         self.stacked_widget.addWidget(self.main_menu_widget)
@@ -45,138 +45,155 @@ class MainWindow(QWidget):
         self.setLayout(layout)
 
     def setup_main_menu(self):
-        layout = QVBoxLayout()  # Creates a vertical layout for the main menu
+        layout = QVBoxLayout()
 
-        # Creates and style the welcome label
         label = QLabel("Welcome to the Pokemon App!")
-        label.setFont(QFont('Arial', 24))  # Set font style and size
-        label.setStyleSheet("color: white; margin: 20px;")  # Set text color and margin
-        layout.addWidget(label)  # Add the label to the layout
-        layout.addStretch()  # Add stretch to push the buttons downward
-        
-        # Creates a button for searching Pokémon
-        search_button = QPushButton("Search Pokémon")
-        search_button.clicked.connect(self.show_search_screen)  # Connect button click to the search function
-        layout.addWidget(search_button)  # Add button to the layout
+        label.setFont(QFont('Arial', 24))
+        label.setStyleSheet("color: white; margin: 20px;")
+        layout.addWidget(label)
+        layout.addStretch()
 
-        # Creates buttons for other features
+        search_button = QPushButton("Search Pokémon")
+        search_button.clicked.connect(self.show_search_screen)
+        layout.addWidget(search_button)
+
         other_button1 = QPushButton("Other Feature 1")
-        other_button1.clicked.connect(lambda: self.show_other_screen(1))  # Navigate to feature 1
+        other_button1.clicked.connect(lambda: self.show_other_screen(1))
         layout.addWidget(other_button1)
 
         other_button2 = QPushButton("Other Feature 2")
-        other_button2.clicked.connect(lambda: self.show_other_screen(2))  # Navigate to feature 2
+        other_button2.clicked.connect(lambda: self.show_other_screen(2))
         layout.addWidget(other_button2)
 
         other_button3 = QPushButton("Other Feature 3")
-        other_button3.clicked.connect(lambda: self.show_other_screen(3))  # Navigate to feature 3
+        other_button3.clicked.connect(lambda: self.show_other_screen(3))
         layout.addWidget(other_button3)
 
-        self.main_menu_widget.setLayout(layout)  # Sets the layout for the main menu widget
+        self.main_menu_widget.setLayout(layout)
 
     def setup_search_screen(self):
-        search_widget = QWidget()  # Create a new widget for the search screen
-        layout = QVBoxLayout()  # Create a vertical layout for the search screen
+        search_widget = QWidget()
+        layout = QVBoxLayout()
 
         # Create a horizontal layout for the label and search bar
-        search_layout = QHBoxLayout()  # Horizontal layout to place label and input side by side
+        search_layout = QHBoxLayout()
 
-        # Create and style the search label
         search_label = QLabel("Search for Pokémon by ID or Name:")
-        search_label.setFont(QFont('Arial', 18))  # Set font style and size
-        search_label.setStyleSheet("color: white; margin: 20px;")  # Set text color and margin
-    
-        # Create a search bar for user input
-        self.search_bar = QLineEdit()  # Create a line edit for search input
-        self.search_bar.setPlaceholderText("Enter Pokémon ID or Name")  # Set placeholder text
+        search_label.setFont(QFont('Arial', 18))
+        search_label.setStyleSheet("color: white; margin: 20px;")
 
-        # Add the label and search bar to the horizontal layout
-        search_layout.addWidget(search_label)  # Add label to the left
-        search_layout.addWidget(self.search_bar)  # Add search bar to the right
-        search_layout.addStretch()  # Add stretch to push them to the top
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Enter Pokémon ID or Name")
 
-        # Create a button for searching Pokémon
-        search_button = QPushButton("Search")
-        search_button.clicked.connect(self.search_pokemon)  # Connect the search button to the search function
+        search_layout.addWidget(search_label)
+        search_layout.addWidget(self.search_bar)
+        search_layout.addStretch()
 
-        # Add the horizontal layout and back button to the main layout
-        layout.addLayout(search_layout)  # Add the horizontal layout to the main vertical layout
-        layout.addWidget(search_button)  # Add the search button to the layout
+        search_button = QPushButton("Search by ID/Name")
+        search_button.clicked.connect(self.search_pokemon)
 
-        # Create a QTextEdit widget to display search results
+        # Combo box for selecting Pokémon type
+        self.type_combo_box = QComboBox()
+        self.type_combo_box.addItem("Select Pokémon Type")
+        pokemon_types = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Fighting', 'Flying',
+                         'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Dragon',
+                         'Dark', 'Fairy', 'Normal', 'Psychic']
+        self.type_combo_box.addItems(pokemon_types)
+
+        type_search_button = QPushButton("Search by Type")
+        type_search_button.clicked.connect(self.search_pokemon_by_type)
+
+        layout.addLayout(search_layout)
+        layout.addWidget(search_button)
+        layout.addWidget(self.type_combo_box)
+        layout.addWidget(type_search_button)
+
         self.results_display = QTextEdit()
-        self.results_display.setReadOnly(True)  # Make it read-only
-        layout.addWidget(self.results_display)  # Add the results display to the layout
+        self.results_display.setReadOnly(True)
+        layout.addWidget(self.results_display)
 
-        # Add a stretchable space to push the back button to the bottom without stretching everything else
-        layout.addStretch()  # This will push the back button down
+        layout.addStretch()
 
-        # Create a back button to return to the main menu
         back_button = QPushButton("Back to Main Menu")
-        back_button.clicked.connect(self.show_main_menu)  # Connect button click to return function
-        layout.addWidget(back_button)  # Add the back button to the layout
+        back_button.clicked.connect(self.show_main_menu)
+        layout.addWidget(back_button)
 
-        search_widget.setLayout(layout)  # Set the layout for the search widget
-        self.stacked_widget.addWidget(search_widget)  # Add the new search widget to the stacked widget
-        self.stacked_widget.setCurrentWidget(search_widget)  # Switch to the search screen
+        search_widget.setLayout(layout)
+        self.stacked_widget.addWidget(search_widget)
+        self.stacked_widget.setCurrentWidget(search_widget)
 
     def search_pokemon(self):
-        # Get the input from the search bar
-        search_query = self.search_bar.text().strip().lower()
-
-        # Connect to the database and search for Pokémon
+        search_query = self.search_bar.text().strip()
         conn = sqlite3.connect('Data.db')  # Replace with your .db file path
         cursor = conn.cursor()
 
-        # Execute a query to find Pokémon by ID or Name
-        query = "SELECT * FROM Pokemon WHERE ID = ? OR LOWER(NAME) = ?"
+        # Adjusting the query to ignore case by using UPPER
+        query = "SELECT * FROM Pokemon WHERE UPPER(ID) = UPPER(?) OR UPPER(Name) = UPPER(?)"
         cursor.execute(query, (search_query, search_query))
-        
-        # Fetch the results
+
         results = cursor.fetchall()
         conn.close()
 
-        # Display results in the results_display QTextEdit
         if results:
             display_text = ""
             for row in results:
                 display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
-            self.results_display.setPlainText(display_text)  # Display the formatted results
+            self.results_display.setPlainText(display_text)
         else:
-            self.results_display.setPlainText("No Pokémon found.")  # Display a message if no results
+            self.results_display.setPlainText("No Pokémon found.")
 
+    def search_pokemon_by_type(self):
+        selected_type = self.type_combo_box.currentText()
+
+        if selected_type == "Select Pokémon Type":
+            self.results_display.setPlainText("Please select a valid Pokémon type.")
+            return
+
+        conn = sqlite3.connect('Data.db')  # Replace with your .db file path
+        cursor = conn.cursor()
+
+        # Search for Pokémon by type
+        query = "SELECT * FROM Pokemon WHERE Type = ?"
+        cursor.execute(query, (selected_type,))
+
+        results = cursor.fetchall()
+        conn.close()
+
+        if results:
+            display_text = ""
+            for row in results:
+                display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
+            self.results_display.setPlainText(display_text)
+        else:
+            self.results_display.setPlainText("No Pokémon found of the selected type.")
 
     def show_search_screen(self):
-        self.setup_search_screen()  # Creates and set up a new search screen instance
+        self.setup_search_screen()
 
     def show_main_menu(self):
-        self.stacked_widget.setCurrentWidget(self.main_menu_widget)  # Switchs back to the main menu
+        self.stacked_widget.setCurrentWidget(self.main_menu_widget)
 
     def show_other_screen(self, feature_number):
-        feature_widget = QWidget()  # Creates a new widget for the feature screen
-        layout = QVBoxLayout()  # Creates a vertical layout for the feature screen
-        
-        # Creates a label indicating that the feature is under construction
+        feature_widget = QWidget()
+        layout = QVBoxLayout()
+
         label = QLabel(f"Feature {feature_number} is under construction.")
-        label.setFont(QFont('Arial', 24))  # Sets font style and size
-        label.setStyleSheet("color: white; margin: 20px;")  # Sets text color and margin
-        
-        layout.addWidget(label)  # Adds the label to the layout
-        layout.addStretch()  # Add stretch to push the label to the top
-        
-        # Creates a back button for returning to the main menu
+        label.setFont(QFont('Arial', 24))
+        label.setStyleSheet("color: white; margin: 20px;")
+        layout.addWidget(label)
+        layout.addStretch()
+
         back_button = QPushButton("Back to Main Menu")
-        back_button.clicked.connect(self.show_main_menu)  # Connect button click to return function
-        layout.addWidget(back_button)  # Adds the back button to the layout
-        layout.addStretch()  # Add stretch to push the button to the bottom
-        
-        # Creates a button to go to the screens that are under constrution
-        feature_widget.setLayout(layout)  # Sets the layout for the feature widget
-        self.stacked_widget.addWidget(feature_widget)  # Adds the new feature widget to the stacked widget
-        self.stacked_widget.setCurrentWidget(feature_widget)  # Switchs to the feature screen
+        back_button.clicked.connect(self.show_main_menu)
+        layout.addWidget(back_button)
+        layout.addStretch()
+
+        feature_widget.setLayout(layout)
+        self.stacked_widget.addWidget(feature_widget)
+        self.stacked_widget.setCurrentWidget(feature_widget)
 
 if __name__ == "__main__":
-    app = QApplication([])  # Creates the application
-    window = MainWindow()  # Creates an instance of the main window
-    window.show()  # Show the main window
-    app.exec_()  # Start the application event loop
+    app = QApplication([])
+    window = MainWindow()
+    window.show()
+    app.exec_()

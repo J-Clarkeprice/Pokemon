@@ -47,27 +47,32 @@ class MainWindow(QWidget):
     def setup_main_menu(self):
         layout = QVBoxLayout()
 
+        # Makes a banner to say welcome
         label = QLabel("Welcome to the Pokemon App!")
         label.setFont(QFont('Arial', 24))
         label.setStyleSheet("color: white; margin: 20px;")
         layout.addWidget(label)
         layout.addStretch()
 
+        # Creates a button that takes you to the screen that searchs for Pokemon
         search_button = QPushButton("Search Pokémon")
         search_button.clicked.connect(self.show_search_screen)
         layout.addWidget(search_button)
+        
+        # Creates a button that takes you to the screen that searchs for Moves
+        move_search_button = QPushButton("Search Moves")
+        move_search_button.clicked.connect(self.show_move_search_screen)
+        layout.addWidget(move_search_button)
 
+        # Creates a button that takes you to the screen that searchs for screens that are under development
         other_button1 = QPushButton("Other Feature 1")
         other_button1.clicked.connect(lambda: self.show_other_screen(1))
         layout.addWidget(other_button1)
 
+        # Creates a button that takes you to the screen that searchs for screens that are under development
         other_button2 = QPushButton("Other Feature 2")
         other_button2.clicked.connect(lambda: self.show_other_screen(2))
         layout.addWidget(other_button2)
-
-        other_button3 = QPushButton("Other Feature 3")
-        other_button3.clicked.connect(lambda: self.show_other_screen(3))
-        layout.addWidget(other_button3)
 
         self.main_menu_widget.setLayout(layout)
 
@@ -75,13 +80,14 @@ class MainWindow(QWidget):
         search_widget = QWidget()
         layout = QVBoxLayout()
 
-        # Create a horizontal layout for the label and search bar
+        # Creates a horizontal layout for the label and search bar
         search_layout = QHBoxLayout()
 
         search_label = QLabel("Search for Pokémon by ID or Name:")
         search_label.setFont(QFont('Arial', 18))
         search_label.setStyleSheet("color: white; margin: 20px;")
 
+        # Creates the search bar
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Enter Pokémon ID or Name")
 
@@ -92,7 +98,7 @@ class MainWindow(QWidget):
         search_button = QPushButton("Search by ID/Name")
         search_button.clicked.connect(self.search_pokemon)
 
-        # Combo box for selecting Pokémon type
+        # Creates drop down box for selecting Pokémon type
         self.type_combo_box = QComboBox()
         self.type_combo_box.addItem("Select Pokémon Type")
         pokemon_types = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Fighting', 'Flying',
@@ -124,10 +130,10 @@ class MainWindow(QWidget):
 
     def search_pokemon(self):
         search_query = self.search_bar.text().strip()
-        conn = sqlite3.connect('Data.db')  # Replace with your .db file path
+        conn = sqlite3.connect('Data.db')  # Connects to the data base
         cursor = conn.cursor()
 
-        # Adjusting the query to ignore case by using UPPER
+        # Searches for the pokemon.
         query = "SELECT * FROM Pokemon WHERE UPPER(ID) = UPPER(?) OR UPPER(Name) = UPPER(?)"
         cursor.execute(query, (search_query, search_query))
 
@@ -149,7 +155,7 @@ class MainWindow(QWidget):
             self.results_display.setPlainText("Please select a valid Pokémon type.")
             return
 
-        conn = sqlite3.connect('Data.db')  # Replace with your .db file path
+        conn = sqlite3.connect('Data.db')  # Connects to the data base
         cursor = conn.cursor()
 
         # Search for Pokémon by type
@@ -166,6 +172,111 @@ class MainWindow(QWidget):
             self.results_display.setPlainText(display_text)
         else:
             self.results_display.setPlainText("No Pokémon found of the selected type.")
+
+    def setup_move_search_screen(self):
+        move_search_widget = QWidget()
+        layout = QVBoxLayout()
+
+        # Creates a horizontal layout for the search bar
+        search_layout = QHBoxLayout()
+
+        search_label = QLabel("Search for Moves by Name:")
+        search_label.setFont(QFont('Arial', 18))
+        search_label.setStyleSheet("color: white; margin: 20px;")
+
+        self.move_search_bar = QLineEdit()
+        self.move_search_bar.setPlaceholderText("Enter Move Name")
+
+        search_layout.addWidget(search_label)
+        search_layout.addWidget(self.move_search_bar)
+        search_layout.addStretch()
+
+        search_button = QPushButton("Search by Name")
+        search_button.clicked.connect(self.search_moves_by_name)
+
+        # Creates the drop down box for selecting move type
+        self.move_type_combo_box = QComboBox()
+        self.move_type_combo_box.addItem("Select Move Type")
+        move_types = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Fighting', 'Flying',
+                      'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Dragon',
+                      'Dark', 'Fairy', 'Normal', 'Psychic']
+        self.move_type_combo_box.addItems(move_types)
+
+        type_search_button = QPushButton("Search by Type")
+        type_search_button.clicked.connect(self.search_moves_by_type)
+
+        layout.addLayout(search_layout)
+        layout.addWidget(search_button)
+        layout.addWidget(self.move_type_combo_box)
+        layout.addWidget(type_search_button)
+
+        self.move_results_display = QTextEdit()
+        self.move_results_display.setReadOnly(True)
+        layout.addWidget(self.move_results_display)
+
+        layout.addStretch()
+
+        back_button = QPushButton("Back to Main Menu")
+        back_button.clicked.connect(self.show_main_menu)
+        layout.addWidget(back_button)
+
+        move_search_widget.setLayout(layout)
+        self.stacked_widget.addWidget(move_search_widget)
+        self.stacked_widget.setCurrentWidget(move_search_widget)
+
+    def search_moves_by_name(self):
+        search_query = self.move_search_bar.text().strip()
+        if not search_query:
+            self.move_results_display.setPlainText("Please enter a move name.")
+            return
+
+        conn = sqlite3.connect('Data.db')  # Connects to the data base
+        cursor = conn.cursor()
+
+        # Searches for Moves
+        query = "SELECT * FROM Moves WHERE UPPER(Name) = UPPER(?)"
+        cursor.execute(query, (search_query,))
+
+        results = cursor.fetchall()
+        conn.close()
+
+        if results:
+            display_text = ""
+            for row in results:
+                display_text += (f"Name: {row[0]}, Type: {row[1]}, Category: {row[2]}, "
+                                f"Power: {row[3]}, Accuracy: {row[4]}, PP: {row[5]}\n")
+            self.move_results_display.setPlainText(display_text)
+        else:
+            self.move_results_display.setPlainText("No move found.")
+
+
+    def search_moves_by_type(self):
+        selected_type = self.move_type_combo_box.currentText()
+
+        if selected_type == "Select Move Type":
+            self.move_results_display.setPlainText("Please select a valid move type.")
+            return
+
+        conn = sqlite3.connect('Data.db') 
+        cursor = conn.cursor()
+
+        # Search for moves by type
+        query = "SELECT * FROM Moves WHERE Type = ?"
+        cursor.execute(query, (selected_type,))
+
+        results = cursor.fetchall()
+        conn.close()
+
+        if results:
+            display_text = ""
+            for row in results:
+                display_text += f"Name: {row[0]}, Type: {row[1]}, Category: {row[2]}, Power: {row[3]}, Accuracy: {row[4]}, PP: {row[5]}\n"
+            self.move_results_display.setPlainText(display_text)
+        else:
+            self.move_results_display.setPlainText("No moves found of the selected type.")
+
+    def show_move_search_screen(self):
+        self.setup_move_search_screen()
 
     def show_search_screen(self):
         self.setup_search_screen()

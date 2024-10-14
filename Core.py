@@ -159,8 +159,8 @@ class MainWindow(QWidget):
         cursor = conn.cursor()
 
         # Search for Pokémon by type
-        query = "SELECT * FROM Pokemon WHERE Type = ?"
-        cursor.execute(query, (selected_type,))
+        query = "SELECT * FROM Pokemon WHERE Upper(Type) LIKE(?)"
+        cursor.execute(query, (f'%{selected_type}%',))
 
         results = cursor.fetchall()
         conn.close()
@@ -261,8 +261,8 @@ class MainWindow(QWidget):
         cursor = conn.cursor()
 
         # Search for moves by type
-        query = "SELECT * FROM Moves WHERE Type = ?"
-        cursor.execute(query, (selected_type,))
+        query = "SELECT * FROM Moves WHERE Upper(Type) LIKE(?)"
+        cursor.execute(query, (f'%{selected_type}%',))
 
         results = cursor.fetchall()
         conn.close()

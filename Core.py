@@ -73,16 +73,16 @@ class MainWindow(QWidget):
         other_button2 = QPushButton("Other Feature 2")
         other_button2.clicked.connect(lambda: self.show_other_screen(2))
         layout.addWidget(other_button2)
-
         self.main_menu_widget.setLayout(layout)
 
+    # This is the section of code that sets up the search screen for Pokemon
+    # This is not the move search screen
     def setup_search_screen(self):
         search_widget = QWidget()
         layout = QVBoxLayout()
 
         # Creates a horizontal layout for the label and search bar
         search_layout = QHBoxLayout()
-
         search_label = QLabel("Search for Pokémon by ID or Name:")
         search_label.setFont(QFont('Arial', 18))
         search_label.setStyleSheet("color: white; margin: 20px;")
@@ -90,11 +90,11 @@ class MainWindow(QWidget):
         # Creates the search bar
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Enter Pokémon ID or Name")
-
         search_layout.addWidget(search_label)
         search_layout.addWidget(self.search_bar)
         search_layout.addStretch()
 
+        # This creates the button that allows you to execute the search function
         search_button = QPushButton("Search by ID/Name")
         search_button.clicked.connect(self.search_pokemon)
 
@@ -106,6 +106,7 @@ class MainWindow(QWidget):
                          'Dark', 'Fairy', 'Normal', 'Psychic']
         self.type_combo_box.addItems(pokemon_types)
 
+        # This creates the button that allows you to search for Pokemon by type
         type_search_button = QPushButton("Search by Type")
         type_search_button.clicked.connect(self.search_pokemon_by_type)
 
@@ -114,10 +115,12 @@ class MainWindow(QWidget):
         layout.addWidget(self.type_combo_box)
         layout.addWidget(type_search_button)
 
+        # This is the section of code that creates a display to show the data that was searched for
         self.results_display = QTextEdit()
         self.results_display.setReadOnly(True)
         layout.addWidget(self.results_display)
 
+        # This moves the buttons & search bars to their correct postioning when the application window size is changed
         layout.addStretch()
 
         back_button = QPushButton("Back to Main Menu")

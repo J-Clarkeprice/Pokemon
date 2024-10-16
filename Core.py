@@ -29,6 +29,28 @@ class MainWindow(QWidget):
         palette.setColor(QPalette.WindowText, Qt.white)
         self.setPalette(palette)
 
+        # Define colors for different Pokémon types
+        self.type_colors = {
+            "Fire": "#FF4500",  # Red-orange
+            "Water": "#1E90FF",  # Blue
+            "Grass": "#32CD32",  # Green
+            "Electric": "#FFD700",  # Yellow
+            "Ice": "#ADD8E6",  # Light Blue
+            "Fighting": "#8B0000",  # Dark Red
+            "Flying": "#87CEEB",  # Sky Blue
+            "Poison": "#9400D3",  # Purple
+            "Ground": "#DEB887",  # Light Brown
+            "Rock": "#A52A2A",  # Brown
+            "Bug": "#9ACD32",  # Yellow-green
+            "Ghost": "#4B0082",  # Indigo
+            "Steel": "#B0C4DE",  # Light Steel Blue
+            "Dragon": "#4682B4",  # Steel Blue
+            "Dark": "#2F4F4F",  # Dark Slate Gray
+            "Fairy": "#FFB6C1",  # Light Pink
+            "Normal": "#D3D3D3",  # Light Gray
+            "Psychic": "#FF69B4",  # Hot Pink
+        }
+
         # Creates a QStackedWidget to manage different screens in the application
         self.stacked_widget = QStackedWidget(self)
 
@@ -131,6 +153,27 @@ class MainWindow(QWidget):
         self.stacked_widget.addWidget(search_widget)
         self.stacked_widget.setCurrentWidget(search_widget)
 
+
+    def update_palette_for_type(self, pokemon_type):
+        """Update the color palette based on Pokémon or Move type. Handles dual types as well."""
+        
+        if "/" in pokemon_type:  # Check for dual type
+            types = pokemon_type.split("/")  # Split the dual types
+            type1 = types[0].strip()
+            type2 = types[1].strip()
+            
+            # Get colors for both types
+            color1 = self.type_colors.get(type1, "#2c3e50")  # Default color if type not found
+            color2 = self.type_colors.get(type2, "#2c3e50")
+            
+            # Apply a gradient background using the two colors
+            self.setStyleSheet(f"background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 {color1}, stop:1 {color2});")
+        
+        else:
+            # Single type Pokémon, just apply the regular color
+            color = self.type_colors.get(pokemon_type, "#2c3e50")  # Default color if type not found
+            self.setStyleSheet(f"background-color: {color};")
+
     def search_pokemon(self):
         search_query = self.search_bar.text().strip()
         conn = sqlite3.connect('Data.db')  # Connects to the data base
@@ -145,12 +188,15 @@ class MainWindow(QWidget):
 
         if results:
             display_text = ""
+            pokemon_type = results[0][2]
+            self.update_palette_for_type(pokemon_type) # Change the background color to reflect the Pokémon type, including dual types
             for row in results:
                 display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
             self.results_display.setPlainText(display_text)
         else:
             self.results_display.setPlainText("No Pokémon found.")
-
+            self.update_palette_for_type("")# Reset to default color if nothing is found
+            
     def search_pokemon_by_type(self):
         selected_type = self.type_combo_box.currentText()
 
@@ -170,11 +216,14 @@ class MainWindow(QWidget):
 
         if results:
             display_text = ""
+            pokemon_type = selected_type
+            self.update_palette_for_type(pokemon_type)
             for row in results:
                 display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
             self.results_display.setPlainText(display_text)
         else:
             self.results_display.setPlainText("No Pokémon found of the selected type.")
+            self.update_palette_for_type("")  # Reset to default color if nothing is found
 
     def setup_move_search_screen(self):
         move_search_widget = QWidget()

@@ -294,13 +294,15 @@ class MainWindow(QWidget):
 
         if results:
             display_text = ""
+            Move_type = results[0][1]
+            self.update_palette_for_type(Move_type) # Change the background color to reflect the Pokémon type, including dual types
             for row in results:
                 display_text += (f"Name: {row[0]}, Type: {row[1]}, Category: {row[2]}, "
                                 f"Power: {row[3]}, Accuracy: {row[4]}, PP: {row[5]}\n")
             self.move_results_display.setPlainText(display_text)
         else:
             self.move_results_display.setPlainText("No move found.")
-
+            self.update_palette_for_type("")  # Reset to default color if nothing is found
 
     def search_moves_by_type(self):
         selected_type = self.move_type_combo_box.currentText()
@@ -321,11 +323,14 @@ class MainWindow(QWidget):
 
         if results:
             display_text = ""
+            Move_type = selected_type
+            self.update_palette_for_type(Move_type)
             for row in results:
                 display_text += f"Name: {row[0]}, Type: {row[1]}, Category: {row[2]}, Power: {row[3]}, Accuracy: {row[4]}, PP: {row[5]}\n"
             self.move_results_display.setPlainText(display_text)
         else:
             self.move_results_display.setPlainText("No moves found of the selected type.")
+            self.update_palette_for_type("")  # Reset to default color if nothing is found
 
     def show_move_search_screen(self):
         self.setup_move_search_screen()

@@ -102,7 +102,8 @@ class MainWindow(QWidget):
     def setup_search_screen(self):
         search_widget = QWidget()
         layout = QVBoxLayout()
-
+        self.reset_button_styles()
+        
         # Creates a horizontal layout for the label and search bar
         search_layout = QHBoxLayout()
         search_label = QLabel("Search for Pokémon by ID or Name:")
@@ -153,6 +154,11 @@ class MainWindow(QWidget):
         self.stacked_widget.addWidget(search_widget)
         self.stacked_widget.setCurrentWidget(search_widget)
 
+    def reset_button_styles(self):
+        # Resets the style of buttons to default for all buttons in the current window
+        buttons = self.findChildren(QPushButton)
+        for button in buttons:
+            button.setStyleSheet("color: black; background-color: #f0f0f0;")
 
     def update_palette_for_type(self, pokemon_type):
         """Update the color palette based on Pokémon or Move type. Handles dual types as well."""
@@ -174,6 +180,17 @@ class MainWindow(QWidget):
             color = self.type_colors.get(pokemon_type, "#2c3e50")  # Default color if type not found
             self.setStyleSheet(f"background-color: {color};")
 
+        self.reset_button_styles()
+
+    def reset_to_default_palette(self):
+        self.setStyleSheet("background-color: #2c3e50;")
+        self.reset_button_styles()
+        
+    def reset_button_styles(self):
+        buttons = self.findChildren(QPushButton)
+        for button in buttons:
+            button.setStyleSheet("color: black; background-color: #f0f0f0;")
+        
     def search_pokemon(self):
         search_query = self.search_bar.text().strip()
         conn = sqlite3.connect('Data.db')  # Connects to the data base
@@ -228,6 +245,7 @@ class MainWindow(QWidget):
     def setup_move_search_screen(self):
         move_search_widget = QWidget()
         layout = QVBoxLayout()
+        self.reset_button_styles()
 
         # Creates a horizontal layout for the search bar
         search_layout = QHBoxLayout()
@@ -334,11 +352,14 @@ class MainWindow(QWidget):
 
     def show_move_search_screen(self):
         self.setup_move_search_screen()
+        self.reset_to_default_palette()
 
     def show_search_screen(self):
         self.setup_search_screen()
-
+        self.reset_to_default_palette()
+        
     def show_main_menu(self):
+        self.reset_to_default_palette()
         self.stacked_widget.setCurrentWidget(self.main_menu_widget)
 
     def show_other_screen(self, feature_number):

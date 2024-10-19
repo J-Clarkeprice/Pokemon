@@ -113,6 +113,7 @@ class MainWindow(QWidget):
         # Creates the search bar
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Enter Pokémon ID or Name")
+        self.search_bar.setStyleSheet("background-color: white; color: black;")
         search_layout.addWidget(search_label)
         search_layout.addWidget(self.search_bar)
         search_layout.addStretch()
@@ -128,6 +129,7 @@ class MainWindow(QWidget):
                          'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Dragon',
                          'Dark', 'Fairy', 'Normal', 'Psychic']
         self.type_combo_box.addItems(pokemon_types)
+        self.type_combo_box.setStyleSheet("background-color: white; color: black;")
 
         # This creates the button that allows you to search for Pokemon by type
         type_search_button = QPushButton("Search by Type")
@@ -141,6 +143,7 @@ class MainWindow(QWidget):
         # This is the section of code that creates a display to show the data that was searched for
         self.results_display = QTextEdit()
         self.results_display.setReadOnly(True)
+        self.results_display.setStyleSheet("background-color: white; color: black;")
         layout.addWidget(self.results_display)
 
         # This moves the buttons & search bars to their correct postioning when the application window size is changed
@@ -256,6 +259,7 @@ class MainWindow(QWidget):
 
         self.move_search_bar = QLineEdit()
         self.move_search_bar.setPlaceholderText("Enter Move Name")
+        self.move_search_bar.setStyleSheet("background-color: white; color: black;")
 
         search_layout.addWidget(search_label)
         search_layout.addWidget(self.move_search_bar)
@@ -271,6 +275,7 @@ class MainWindow(QWidget):
                       'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Dragon',
                       'Dark', 'Fairy', 'Normal', 'Psychic']
         self.move_type_combo_box.addItems(move_types)
+        self.move_type_combo_box.setStyleSheet("background-color: white; color: black;")
 
         type_search_button = QPushButton("Search by Type")
         type_search_button.clicked.connect(self.search_moves_by_type)
@@ -282,6 +287,7 @@ class MainWindow(QWidget):
 
         self.move_results_display = QTextEdit()
         self.move_results_display.setReadOnly(True)
+        self.move_results_display.setStyleSheet("background-color: white; color: black;")
         layout.addWidget(self.move_results_display)
 
         layout.addStretch()

@@ -1,4 +1,5 @@
 import sqlite3
+import os
 from PyQt5.QtWidgets import (
     QApplication,
     QLabel,
@@ -12,7 +13,7 @@ from PyQt5.QtWidgets import (
     QComboBox,
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPalette, QColor
+from PyQt5.QtGui import QFont, QPalette, QColor, QPixmap
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -165,7 +166,12 @@ class MainWindow(QWidget):
         self.results_display.setReadOnly(True)
         self.results_display.setStyleSheet("background-color: white; color: black;")
         layout.addWidget(self.results_display)
-        
+
+        self.pokemon_image_label = QLabel()
+        self.pokemon_image_label.setFixedSize(100, 100)
+        self.pokemon_image_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.pokemon_image_label)
+
         layout.addStretch()
 
         back_button = QPushButton("Back to Main Menu")
@@ -217,8 +223,44 @@ class MainWindow(QWidget):
                             f"SpDef: {result[8]}, Speed: {result[9]}, Evolution: {result[10]}")
             self.update_palette_for_type(result[2])
             self.results_display.setPlainText(display_text)
+            self.load_pokemon_image(pokemon_id)
         else:
             self.results_display.setPlainText(f"No Pokémon found with ID {pokemon_id}.")
+
+    def fetch_pokemon_by_name(self, pokemon_name):
+        conn = sqlite3.connect('Data.db')
+        cursor = conn.cursor()
+
+        query = "SELECT * FROM Pokemon WHERE UPPER(Name) = UPPER(?)"
+        cursor.execute(query, (pokemon_name,))
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            display_text = (f"ID: {result[0]}, Name: {result[1]}, Type: {result[2]}, Total: {result[3]}, "
+                            f"HP: {result[4]}, Attack: {result[5]}, Defense: {result[6]}, SpAtk: {result[7]}, "
+                            f"SpDef: {result[8]}, Speed: {result[9]}, Evolution: {result[10]}")
+            self.update_palette_for_type(result[2])
+            self.results_display.setPlainText(display_text)
+
+            # Load the image using the Pokémon ID
+            self.current_pokemon_id = result[0]
+            self.load_pokemon_image(result[0])  # Use ID from the result to load the image
+        else:
+            self.results_display.setPlainText(f"No Pokémon found with name '{pokemon_name}'.")
+
+    def load_pokemon_image(self, pokemon_id):
+        # Construct the relative file path based on the Pokémon ID
+        current_dir = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the current script
+        image_path = os.path.join(current_dir, 'Images', f'{pokemon_id}.jpg')  # Create the relative path
+
+        # Set the image in the QLabel
+        pixmap = QPixmap(image_path)  # Load the image using QPixmap
+        if not pixmap.isNull():  # Check if the image loaded successfully
+            self.pokemon_image_label.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        else:
+            self.pokemon_image_label.clear()  # Clear if the image is not found
+            self.pokemon_image_label.setText("Image not found.")
 
     def reset_button_styles(self):
         # Resets the style of buttons to default for all buttons in the current window
@@ -256,21 +298,24 @@ class MainWindow(QWidget):
         buttons = self.findChildren(QPushButton)
         for button in buttons:
             button.setStyleSheet("color: black; background-color: #f0f0f0;")
-        
-    def search_pokemon(self):
+    
+    def search_pokemon(self, query):
+        self.fetch_pokemon_by_name(query)
         search_query = self.search_bar.text().strip()
-        conn = sqlite3.connect('Data.db')  # Connects to the data base
+        conn = sqlite3.connect('Data.db')
         cursor = conn.cursor()
-
+        
+        # If the search query is a digit, treat it as an ID
         if search_query.isdigit():
             pokemon_id = int(search_query)
             self.fetch_pokemon_by_id(pokemon_id)
-            # Update current Pokémon ID to the searched one
+            # Update the current Pokémon ID to the searched one
             self.current_pokemon_id = pokemon_id
         else:
-            self.fetch_pokemon_by_name(query)
+            # Otherwise, treat it as a name and fetch the Pokémon by name
+            self.fetch_pokemon_by_name(search_query)
 
-        # Searches for the pokemon.
+            # Searches for the pokemon.
         query = "SELECT * FROM Pokemon WHERE UPPER(ID) = UPPER(?) OR UPPER(Name) = UPPER(?)"
         cursor.execute(query, (search_query, search_query))
 
@@ -283,7 +328,8 @@ class MainWindow(QWidget):
             self.update_palette_for_type(pokemon_type) # Change the background color to reflect the Pokémon type, including dual types
             for row in results:
                 display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
-            self.results_display.setPlainText(display_text)      
+            self.results_display.setPlainText(display_text)  
+            self.load_pokemon_image(self.current_pokemon_id)    
         else:
             self.results_display.setPlainText("No Pokémon found.")
             self.pokemon_image_label.clear()
@@ -293,6 +339,7 @@ class MainWindow(QWidget):
 
         if selected_type == "Select Pokémon Type":
             self.results_display.setPlainText("Please select a valid Pokémon type.")
+            self.pokemon_image_label.clear()
             return
 
         conn = sqlite3.connect('Data.db')  # Connects to the data base

@@ -1,4 +1,3 @@
-import sys
 import sqlite3
 from PyQt5.QtWidgets import (
     QApplication,
@@ -144,12 +143,29 @@ class MainWindow(QWidget):
 
         layout.addLayout(search_layout)  # Add the horizontal search layout
 
+        # Add navigation arrow buttons
+        navigation_layout = QHBoxLayout()
+
+        # Left arrow button (previous Pokémon)
+        self.left_arrow_button = QPushButton("←")
+        self.left_arrow_button.setFixedWidth(50)
+        self.left_arrow_button.clicked.connect(self.show_previous_pokemon)
+        navigation_layout.addWidget(self.left_arrow_button)
+
+        # Right arrow button (next Pokémon)
+        self.right_arrow_button = QPushButton("→")
+        self.right_arrow_button.setFixedWidth(50)
+        self.right_arrow_button.clicked.connect(self.show_next_pokemon)
+        navigation_layout.addWidget(self.right_arrow_button)
+
+        layout.addLayout(navigation_layout)
+
         # Display area for search results
         self.results_display = QTextEdit()
         self.results_display.setReadOnly(True)
         self.results_display.setStyleSheet("background-color: white; color: black;")
         layout.addWidget(self.results_display)
-
+        
         layout.addStretch()
 
         back_button = QPushButton("Back to Main Menu")
@@ -159,6 +175,50 @@ class MainWindow(QWidget):
         search_widget.setLayout(layout)
         self.stacked_widget.addWidget(search_widget)
         self.stacked_widget.setCurrentWidget(search_widget)
+
+        # Initialize current Pokémon ID tracker
+        self.current_pokemon_id = 1
+
+    def show_previous_pokemon(self):
+        if self.current_pokemon_id > 1:  # Prevent going below ID 1
+            self.current_pokemon_id -= 1
+            self.fetch_pokemon_by_id(self.current_pokemon_id)
+        else:
+            self.results_display.setPlainText("This is the first Pokémon.")
+
+    def show_next_pokemon(self):
+        conn = sqlite3.connect('Data.db')
+        cursor = conn.cursor()
+    
+        # Find the max ID in the database
+        cursor.execute("SELECT MAX(ID) FROM Pokemon")
+        max_id = cursor.fetchone()[0]
+        conn.close()
+
+        if self.current_pokemon_id < max_id:  # Prevent going past the last Pokémon
+            self.current_pokemon_id += 1
+            self.fetch_pokemon_by_id(self.current_pokemon_id)
+        else:
+            self.results_display.setPlainText("This is the last Pokémon.")
+
+    def fetch_pokemon_by_id(self, pokemon_id):
+        conn = sqlite3.connect('Data.db')
+        cursor = conn.cursor()
+
+        # Fetch Pokémon by ID
+        query = "SELECT * FROM Pokemon WHERE ID = ?"
+        cursor.execute(query, (pokemon_id,))
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            display_text = (f"ID: {result[0]}, Name: {result[1]}, Type: {result[2]}, Total: {result[3]}, "
+                            f"HP: {result[4]}, Attack: {result[5]}, Defense: {result[6]}, SpAtk: {result[7]}, "
+                            f"SpDef: {result[8]}, Speed: {result[9]}, Evolution: {result[10]}")
+            self.update_palette_for_type(result[2])
+            self.results_display.setPlainText(display_text)
+        else:
+            self.results_display.setPlainText(f"No Pokémon found with ID {pokemon_id}.")
 
     def reset_button_styles(self):
         # Resets the style of buttons to default for all buttons in the current window
@@ -202,6 +262,14 @@ class MainWindow(QWidget):
         conn = sqlite3.connect('Data.db')  # Connects to the data base
         cursor = conn.cursor()
 
+        if search_query.isdigit():
+            pokemon_id = int(search_query)
+            self.fetch_pokemon_by_id(pokemon_id)
+            # Update current Pokémon ID to the searched one
+            self.current_pokemon_id = pokemon_id
+        else:
+            self.fetch_pokemon_by_name(query)
+
         # Searches for the pokemon.
         query = "SELECT * FROM Pokemon WHERE UPPER(ID) = UPPER(?) OR UPPER(Name) = UPPER(?)"
         cursor.execute(query, (search_query, search_query))
@@ -215,10 +283,10 @@ class MainWindow(QWidget):
             self.update_palette_for_type(pokemon_type) # Change the background color to reflect the Pokémon type, including dual types
             for row in results:
                 display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
-            self.results_display.setPlainText(display_text)
+            self.results_display.setPlainText(display_text)      
         else:
             self.results_display.setPlainText("No Pokémon found.")
-            self.update_palette_for_type("")# Reset to default color if nothing is found
+            self.pokemon_image_label.clear()
             
     def search_pokemon_by_type(self):
         selected_type = self.type_combo_box.currentText()

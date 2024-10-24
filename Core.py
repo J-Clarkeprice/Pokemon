@@ -359,7 +359,9 @@ class MainWindow(QWidget):
             for row in results:
                 display_text += f"ID: {row[0]}, Name: {row[1]}, Type: {row[2]}, Total: {row[3]}, HP: {row[4]}, Attack: {row[5]}, Def: {row[6]}, SpAtk: {row[7]}, SpDef: {row[8]}, Speed: {row[9]}, Evolution: {row[10]}\n"
             self.results_display.setPlainText(display_text)
+            self.pokemon_image_label.clear()
         else:
+            self.pokemon_image_label.clear()
             self.results_display.setPlainText("No Pokémon found of the selected type.")
             self.update_palette_for_type("")  # Reset to default color if nothing is found
 
